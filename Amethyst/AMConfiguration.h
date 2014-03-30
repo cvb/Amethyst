@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "KbLayout.h"
 
 @class AMHotKeyManager;
 @class AMWindowManager;
@@ -36,7 +37,9 @@
 //                 handlers.
 // windowManager - The AMWindowManager that can be used for performing window
 //                 management operations.
-- (void)setUpWithHotKeyManager:(AMHotKeyManager *)hotKeyManager windowManager:(AMWindowManager *)windowManager;
+- (void)setUpWithHotKeyManager:(AMHotKeyManager *)hotKeyManager
+                 windowManager:(AMWindowManager *) windowManager
+                            kb:(KbLayoutManager *) kb;
 
 // Returns an array of AMLayout Class objects to generate layouts from.
 - (NSArray *)layouts;

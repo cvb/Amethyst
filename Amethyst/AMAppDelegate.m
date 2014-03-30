@@ -11,6 +11,7 @@
 #import "AMConfiguration.h"
 #import "AMHotKeyManager.h"
 #import "AMWindowManager.h"
+#import "KbLayout.h"
 
 #import <CocoaLumberjack/DDASLLogger.h>
 #import <CocoaLumberjack/DDTTYLogger.h>
@@ -20,6 +21,7 @@
 @interface AMAppDelegate ()
 @property (nonatomic, strong) AMWindowManager *windowManager;
 @property (nonatomic, strong) AMHotKeyManager *hotKeyManager;
+@property (nonatomic, strong) KbLayoutManager *kbLayoutManager;
 
 @property (nonatomic, strong) NSStatusItem *statusItem;
 @property (nonatomic, strong) IBOutlet NSMenu *statusItemMenu;
@@ -44,10 +46,15 @@
         return [NSImage imageNamed:@"icon-statusitem-disabled"];
     }];
 
-    self.windowManager = [[AMWindowManager alloc] init];
-    self.hotKeyManager = [[AMHotKeyManager alloc] init];
+    self.kbLayoutManager = [[KbLayoutManager alloc] init];
+    self.windowManager   = [[AMWindowManager alloc]
+                             initWithKb:self.kbLayoutManager];
+    self.hotKeyManager   = [[AMHotKeyManager alloc] init];
 
-    [AMConfiguration.sharedConfiguration setUpWithHotKeyManager:self.hotKeyManager windowManager:self.windowManager];
+    [AMConfiguration.sharedConfiguration
+        setUpWithHotKeyManager:self.hotKeyManager
+        windowManager:self.windowManager
+        kb:self.kbLayoutManager];
 }
 
 - (void)awakeFromNib {

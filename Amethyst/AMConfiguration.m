@@ -18,6 +18,7 @@
 #import "AMLayout.h"
 #import "AMScreenManager.h"
 #import "AMWindowManager.h"
+#import "KbLayout.h"
 
 // The layouts key should be a list of string identifying layout algorithms.
 static NSString *const AMConfigurationLayoutsKey = @"layouts";
@@ -37,6 +38,7 @@ static NSString *const AMConfigurationCommandKeyKey = @"key";
 // Valid strings that can be used in configuration for command modifiers.
 static NSString *const AMConfigurationMod1String = @"mod1";
 static NSString *const AMConfigurationMod2String = @"mod2";
+static NSString *const AMConfigurationMod3String = @"mod3";
 
 // Command strings that reference possible window management commands. They are
 // optionally present in the configuration file. If any is ommitted the default
@@ -62,6 +64,8 @@ static NSString *const AMConfigurationCommandToggleFloatKey = @"toggle-float";
 static NSString *const AMConfigurationCommandDisplayCurrentLayoutKey = @"display-current-layout";
 static NSString *const AMConfigurationCommandToggleTilingKey = @"toggle-tiling";
 
+static NSString *const AMConfigurationCommandToggleInput = @"toggle-input";
+
 // Key to reference an array of application bundle identifiers whose windows
 // should always be floating by default.
 static NSString *const AMConfigurationFloatingBundleIdentifiers = @"floating";
@@ -76,6 +80,7 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
 
 @property (nonatomic, assign) AMModifierFlags modifier1;
 @property (nonatomic, assign) AMModifierFlags modifier2;
+@property (nonatomic, assign) AMModifierFlags modifier3;
 @end
 
 @implementation AMConfiguration
@@ -156,6 +161,11 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
 
     self.modifier1 = [self modifierFlagsForStrings:self.configuration[AMConfigurationMod1String] ?: self.defaultConfiguration[AMConfigurationMod1String]];
     self.modifier2 = [self modifierFlagsForStrings:self.configuration[AMConfigurationMod2String] ?: self.defaultConfiguration[AMConfigurationMod2String]];
+    self.modifier3 =
+      [self
+        modifierFlagsForStrings:self.configuration[AMConfigurationMod3String]
+        ?: self.defaultConfiguration[AMConfigurationMod3String]];
+
 }
 
 - (NSString *)constructLayoutKeyString:(NSString *)layoutString {
@@ -167,6 +177,7 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
 - (AMModifierFlags)modifierFlagsForModifierString:(NSString *)modifierString {
     if ([modifierString isEqualToString:@"mod1"]) return self.modifier1;
     if ([modifierString isEqualToString:@"mod2"]) return self.modifier2;
+    if ([modifierString isEqualToString:@"mod3"]) return self.modifier3;
 
     DDLogError(@"Unknown modifier string: %@", modifierString);
 
@@ -182,6 +193,8 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
         commandFlags = self.modifier1;
     } else if ([commandModifierString isEqualToString:@"mod2"]) {
         commandFlags = self.modifier2;
+    } else if  ([commandModifierString isEqualToString:@"mod3"]) {
+        commandFlags = self.modifier3;
     } else {
         DDLogError(@"Unknown modifier string: %@", commandModifierString);
         return;
@@ -190,7 +203,9 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
     [hotKeyManager registerHotKeyWithKeyString:commandKeyString modifiers:commandFlags handler:handler];
 }
 
-- (void)setUpWithHotKeyManager:(AMHotKeyManager *)hotKeyManager windowManager:(AMWindowManager *)windowManager {
+- (void)setUpWithHotKeyManager:(AMHotKeyManager *)hotKeyManager
+                 windowManager:(AMWindowManager *)windowManager
+                            kb: (KbLayoutManager *) kb {
     [self constructCommandWithHotKeyManager:hotKeyManager commandKey:AMConfigurationCommandCycleLayoutKey handler:^{
         [windowManager.focusedScreenManager cycleLayout];
     }];
@@ -271,6 +286,12 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
     [self constructCommandWithHotKeyManager:hotKeyManager commandKey:AMConfigurationCommandToggleTilingKey handler:^{
         [AMConfiguration sharedConfiguration].tilingEnabled = ![AMConfiguration sharedConfiguration].tilingEnabled;
         [windowManager markAllScreensForReflow];
+    }];
+
+    [self constructCommandWithHotKeyManager:hotKeyManager
+          commandKey:AMConfigurationCommandToggleInput
+          handler:^{
+        [kb toggleInput];
     }];
 
     NSArray *layoutStrings = self.configuration[AMConfigurationLayoutsKey] ?: self.defaultConfiguration[AMConfigurationLayoutsKey];

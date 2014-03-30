@@ -24,6 +24,7 @@
         "shift",
         "control"
     ],
+    "mod3": ["command"],
 
     "COMMANDS": "----------------------",
     "Commands are": {
@@ -182,6 +183,10 @@
     "display-current-layout": {
         "mod": "mod1",
         "key": "i"
+    },
+    "toggle-input":{
+        "mod": "mod3",
+        "key": "space"
     },
 
     "MISC": "----------------------",

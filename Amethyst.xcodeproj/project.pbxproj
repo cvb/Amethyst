@@ -70,6 +70,7 @@
 		5C09C2AB18C1400F00CF5E6A /* AMRowLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C09C2AA18C1400F00CF5E6A /* AMRowLayout.m */; };
 		5CC5FEE718C5083500895144 /* AMRowLayoutTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5CC5FEE618C5083500895144 /* AMRowLayoutTest.m */; };
 		6718BDA0D79F4A19BED950F4 /* libPods-AmethystTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F3BFE9CAC8A4496793B4217D /* libPods-AmethystTests.a */; };
+		A4D35F1818E84939008B4345 /* KbLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = A4D35F1718E84939008B4345 /* KbLayout.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -199,6 +200,8 @@
 		5C09C2A918C1400F00CF5E6A /* AMRowLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AMRowLayout.h; sourceTree = "<group>"; };
 		5C09C2AA18C1400F00CF5E6A /* AMRowLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AMRowLayout.m; sourceTree = "<group>"; };
 		5CC5FEE618C5083500895144 /* AMRowLayoutTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AMRowLayoutTest.m; sourceTree = "<group>"; };
+		A4D35F1018E846E7008B4345 /* KbLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KbLayout.h; sourceTree = "<group>"; };
+		A4D35F1718E84939008B4345 /* KbLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KbLayout.m; sourceTree = "<group>"; };
 		B0530B06777D42039F419322 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6950BE9E95C4952BCA05552 /* Pods-AmethystTests.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AmethystTests.xcconfig"; path = "Pods/Pods-AmethystTests.xcconfig"; sourceTree = SOURCE_ROOT; };
 		F3BFE9CAC8A4496793B4217D /* libPods-AmethystTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AmethystTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -302,6 +305,7 @@
 		402DB6E71742E41A00D1C936 /* Amethyst */ = {
 			isa = PBXGroup;
 			children = (
+				A4D35F1718E84939008B4345 /* KbLayout.m */,
 				40B392831814977D009A296B /* View */,
 				40B337EF174935ED0001D8FC /* Event Handling */,
 				40B337E51745D1600001D8FC /* Categories */,
@@ -310,6 +314,7 @@
 				402DB6F41742E41A00D1C936 /* AMAppDelegate.m */,
 				4010E7F0174540220066097B /* AMWindowManager.h */,
 				4010E7F1174540220066097B /* AMWindowManager.m */,
+				A4D35F1018E846E7008B4345 /* KbLayout.h */,
 				40B337F9174993D40001D8FC /* AMScreenManager.h */,
 				40B337FA174993D40001D8FC /* AMScreenManager.m */,
 				40B337F617495D7D0001D8FC /* AMConfiguration.h */,
@@ -683,6 +688,7 @@
 				402DB6F51742E41A00D1C936 /* AMAppDelegate.m in Sources */,
 				4010E7F2174540220066097B /* AMWindowManager.m in Sources */,
 				40B39286181497C0009A296B /* AMLayoutNameWindow.m in Sources */,
+				A4D35F1818E84939008B4345 /* KbLayout.m in Sources */,
 				40B337E01745CE2B0001D8FC /* AMLayout.m in Sources */,
 				40B337E41745D0620001D8FC /* AMFullscreenLayout.m in Sources */,
 				40B337EB17465AE00001D8FC /* AMTallLayout.m in Sources */,

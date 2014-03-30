@@ -7,11 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "KbLayout.h"
 
 @class AMScreenManager;
 
 // Object for managing the windows across all screens and spaces.
 @interface AMWindowManager : NSObject
+
+- (id)initWithKb:(KbLayoutManager *)kb;
 
 // Returns the screen manager responsible for the screen containing the
 // currently focused window.

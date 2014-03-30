@@ -13,12 +13,14 @@
 #import "NSRunningApplication+Manageable.h"
 
 @interface AMWindowManager () <AMScreenManagerDelegate>
+@property (nonatomic, strong) KbLayoutManager *kb;
 @property (nonatomic, strong) NSMutableArray *applications;
 @property (nonatomic, strong) NSMutableArray *windows;
 @property (nonatomic, strong) NSString *currentSpaceIdentifier;
 
 @property (nonatomic, strong) NSArray *screenManagers;
 
+- (id)initWithKb:(KbLayoutManager *)kb;
 - (void)applicationDidLaunch:(NSNotification *)notification;
 - (void)applicationDidTerminate:(NSNotification *)notification;
 - (void)applicationDidHide:(NSNotification *)notification;
@@ -41,9 +43,10 @@
 
 @implementation AMWindowManager
 
-- (id)init {
+- (id)initWithKb:(KbLayoutManager *)kb {
     self = [super init];
     if (self) {
+        self.kb = kb;
         self.applications = [NSMutableArray array];
         self.windows = [NSMutableArray array];
 
@@ -550,7 +553,8 @@
 - (void)markScreenForReflow:(NSScreen *)screen {
     for (AMScreenManager *screenManager in self.screenManagers) {
         if ([screenManager.screen isEqual:screen]) {
-            [screenManager setNeedsReflow];
+          [screenManager setNeedsReflow];
+          [self.kb sync];
         }
     }
 }
