@@ -77,14 +77,16 @@
 }
 
 - (void) toggleEmacsLayout {
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath:@"/bin/bash"];
-    [task setArguments:@[ @"-c", @"/usr/local/bin/emacsclient -e \
+  // well sometimes emacs can't turn off input method somehow
+  return;
+  NSTask *task = [[NSTask alloc] init];
+  [task setLaunchPath:@"/bin/bash"];
+  [task setArguments:@[ @"-c", @"/usr/local/bin/emacsclient -e \
                                    '(with-current-buffer \
-                                        (other-buffer :visible-ok t) \
+                                        (other-buffer :visible-ok t)  \
                                       (toggle-input-method))'"
-                          ]];
-    [task launch];
+                        ]];
+  [task launch];
 }
 
 - (void) sync {
