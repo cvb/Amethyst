@@ -29,6 +29,7 @@
     "COMMANDS": "----------------------",
     "Commands are": {
         "cycle-layout": "Cycle layout to the next layout",
+        "cycle-layout-backward": "Cycle layout to the previous layout",
         "focus-screen-1": "Focus the main window on the first screen",
         "focus-screen-2": "Focus the main window on the second screen",
         "focus-screen-3": "Focus the main window on the third screen",
@@ -58,6 +59,10 @@
 
     "cycle-layout": {
         "mod": "mod1",
+        "key": "space"
+    },
+    "cycle-layout-backward": {
+        "mod": "mod2",
         "key": "space"
     },
     "select-tall-layout": {
@@ -123,6 +128,14 @@
     "focus-cw": {
         "mod": "mod1",
         "key": "k"
+    },
+    "swap-screen-ccw": {
+        "mod": "mod2",
+        "key": "h"
+    },
+    "swap-screen-cw": {
+        "mod": "mod2",
+        "key": "l"
     },
     "swap-ccw": {
         "mod": "mod2",
@@ -192,5 +205,7 @@
     "MISC": "----------------------",
     "floating": [],
     "float-small-windows": true,
-    "mouse-follows-focus": false
+    "mouse-follows-focus": false,
+    "enables-layout-hud": true,
+    "enables-layout-hud-on-space-change": true
 }

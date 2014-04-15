@@ -11,6 +11,8 @@ reliant on fragile private APIs.
 
 ![Screenshot](http://ianyh.com/amethyst/images/screenshot-small.png)
 
+A quick screencast of basic functionality can be found [here](http://youtu.be/9ayUdV1sfjA). (It's rough, and I'd love to see a better one if someone has the skills and inclination to make one.)
+
 Credits
 -------
 
@@ -20,7 +22,7 @@ logic and structure.
 Getting Amethyst
 ================
 
-Amethyst is available for direct download [here](http://ianyh.com/amethyst/versions/Amethyst-0.8.4.zip) or using [homebrew cask](https://github.com/phinze/homebrew-cask).
+Amethyst is available for direct download [here](http://ianyh.com/amethyst/versions/Amethyst-0.8.5.zip) or using [homebrew cask](https://github.com/phinze/homebrew-cask).
 
 ```
 brew cask install amethyst
@@ -31,7 +33,7 @@ Note: that Amethyst now is only supported on OS X 10.9. The last version that su
 Building
 --------
 
-0. Install the latest version of XCode
+0. Install the latest version of Xcode
 1. Clone the project, then `cd` to the Amethyst directory.
 2. Install xctool
     - `brew update && brew install xctool`
@@ -41,6 +43,16 @@ Building
     - you may need to `exec zsh` or similar for this command to be found, if using rbenv.
 7. `rake install`
 8. `cp Amethyst/default.amethyst ~/.amethyst`
+
+Contributing
+============
+
+If you'd like to contribute please branch off of the `development` branch. Otherwise just try to stick to the general style of the code.
+
+Contact
+=======
+
+If you have questions or feedback you can [email me](mailto:ianynda@gmail.com) or [drop by #amethyst on Freenode](http://webchat.freenode.net/?channels=amethyst).
 
 Using Amethyst
 ==============
@@ -59,7 +71,8 @@ Amethyst uses two modifier combinations.
 
 And defines the following commands, mostly a mapping to xmonad key combinations.
 
-* `mod1 + space` — change layout
+* `mod1 + space` — cycle to next layout
+* `mod2 + space` - cycle to previous layout
 * `mod1 + w` - focus 1st screen
 * `mod1 + e` - focus 2nd screen
 * `mod1 + r` - focus 3rd screen
@@ -114,6 +127,7 @@ will restrict your layouts to the tall and fullscreen layouts. The available lay
 * **Column** ("column"): All windows are distributed in evenly sized in columns from left to right.
 * **Row** ("row"): All windows are distributed in evenly sized rows from top to bottom.
 * **Floating** ("floating"): All windows are floating. (Useful if you want a space dedicated to floating windows.)
+* **Widescreen Tall** ("widescreen-tall"): Like Tall, but the main area uses columns and the secondary area uses rows.
 
 ### Mouse Follows Focus
 
@@ -144,5 +158,16 @@ You can set specific application to float by default, this can still be toggled 
 
 Get the required string for the app `osascript -e 'id of app "Finder"'`. Just replace `Finder` with the name of your app
 
+### Layout HUD
 
+By default Amethyst pops up a HUD telling you the layout whenever the layout changes. You can disable it in your `.amethyst` file using the `enables-layout-hud` key. i.e.,
 
+```js
+"enables-layout-hud": false
+```
+
+By default the HUD will show when changing to a different space. You can disable the HUD during space changes, while still having it enabled when cycling or selecting a different layout, by using the `enables-layout-hud-on-space-change` key. i.e.,
+
+```js
+"enables-layout-hud-on-space-change": false
+```

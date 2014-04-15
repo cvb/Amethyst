@@ -17,6 +17,7 @@
 #import "AMFloatingLayout.h"
 #import "AMLayout.h"
 #import "AMScreenManager.h"
+#import "AMWidescreenTallLayout.h"
 #import "AMWindowManager.h"
 #import "KbLayout.h"
 
@@ -47,13 +48,16 @@ static NSString *const AMConfigurationMod3String = @"mod3";
 // Note: This technically allows for commands having the same key code and
 // flags. The behavior in that case is not well defined. We may want this to
 // be an assertion error.
-static NSString *const AMConfigurationCommandCycleLayoutKey = @"cycle-layout";
+static NSString *const AMConfigurationCommandCycleLayoutForwardKey = @"cycle-layout";
+static NSString *const AMConfigurationCommandCycleLayoutBackwardKey = @"cycle-layout-backward";
 static NSString *const AMConfigurationCommandShrinkMainKey = @"shrink-main";
 static NSString *const AMConfigurationCommandExpandMainKey = @"expand-main";
 static NSString *const AMConfigurationCommandIncreaseMainKey = @"increase-main";
 static NSString *const AMConfigurationCommandDecreaseMainKey = @"decrease-main";
 static NSString *const AMConfigurationCommandFocusCCWKey = @"focus-ccw";
 static NSString *const AMConfigurationCommandFocusCWKey = @"focus-cw";
+static NSString *const AMConfigurationCommandSwapScreenCCWKey = @"swap-screen-ccw";
+static NSString *const AMConfigurationCommandSwapScreenCWKey = @"swap-screen-cw";
 static NSString *const AMConfigurationCommandSwapCCWKey = @"swap-ccw";
 static NSString *const AMConfigurationCommandSwapCWKey = @"swap-cw";
 static NSString *const AMConfigurationCommandSwapMainKey = @"swap-main";
@@ -72,6 +76,8 @@ static NSString *const AMConfigurationFloatingBundleIdentifiers = @"floating";
 static NSString *const AMConfigurationIgnoreMenuBar = @"ignore-menu-bar";
 static NSString *const AMConfigurationFloatSmallWindows = @"float-small-windows";
 static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus";
+static NSString *const AMConfigurationEnablesLayoutHUD = @"enables-layout-hud";
+static NSString *const AMConfigurationEnablesLayoutHUDOnSpaceChange = @"enables-layout-hud-on-space-change";
 
 
 @interface AMConfiguration ()
@@ -124,6 +130,7 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
     if ([layoutString isEqualToString:@"column"]) return [AMColumnLayout class];
     if ([layoutString isEqualToString:@"row"]) return [AMRowLayout class];
     if ([layoutString isEqualToString:@"floating"]) return [AMFloatingLayout class];
+    if ([layoutString isEqualToString:@"widescreen-tall"]) return [AMWidescreenTallLayout class];
     return nil;
 }
 
@@ -139,21 +146,26 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
     NSError *error;
     NSDictionary *configuration;
 
-    data = [NSData dataWithContentsOfFile:amethystConfigPath];
-    if (data) {
-        configuration = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-        if (error) {
-            DDLogError(@"error loading configuration: %@", error);
-            return;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:amethystConfigPath isDirectory:NO]) {
+        data = [NSData dataWithContentsOfFile:amethystConfigPath];
+        if (data) {
+            configuration = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+            if (error) {
+                DDLogError(@"error loading configuration: %@", error);
+                NSString *message = [NSString stringWithFormat:@"There was an error trying to load your .amethyst configuration. Going to use default configuration. %@", error.localizedDescription];
+                NSRunAlertPanel(@"Error loading configuration", message, @"OK", nil, nil);
+            } else {
+                self.configuration = configuration;
+            }
         }
-
-        self.configuration = configuration;
     }
 
+    error = nil;
     data = [NSData dataWithContentsOfFile:defaultAmethystConfigPath];
     configuration = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
     if (error) {
         DDLogError(@"error loading default configuration: %@", error);
+        NSRunAlertPanel(@"Error loading default configuration", @"There was an error when trying to load the default configuration. Amethyst may not function correctly.", @"OK", nil, nil);
         return;
     }
 
@@ -203,11 +215,16 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
     [hotKeyManager registerHotKeyWithKeyString:commandKeyString modifiers:commandFlags handler:handler];
 }
 
+
 - (void)setUpWithHotKeyManager:(AMHotKeyManager *)hotKeyManager
                  windowManager:(AMWindowManager *)windowManager
                             kb: (KbLayoutManager *) kb {
-    [self constructCommandWithHotKeyManager:hotKeyManager commandKey:AMConfigurationCommandCycleLayoutKey handler:^{
-        [windowManager.focusedScreenManager cycleLayout];
+    [self constructCommandWithHotKeyManager:hotKeyManager commandKey:AMConfigurationCommandCycleLayoutForwardKey handler:^{
+        [windowManager.focusedScreenManager cycleLayoutForward];
+    }];
+
+    [self constructCommandWithHotKeyManager:hotKeyManager commandKey:AMConfigurationCommandCycleLayoutBackwardKey handler:^{
+        [windowManager.focusedScreenManager cycleLayoutBackward];
     }];
 
     [self constructCommandWithHotKeyManager:hotKeyManager commandKey:AMConfigurationCommandShrinkMainKey handler:^{
@@ -240,6 +257,14 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
 
     [self constructCommandWithHotKeyManager:hotKeyManager commandKey:AMConfigurationCommandFocusCWKey handler:^{
         [windowManager moveFocusClockwise];
+    }];
+
+    [self constructCommandWithHotKeyManager:hotKeyManager commandKey:AMConfigurationCommandSwapScreenCCWKey handler:^{
+        [windowManager swapFocusedWindowScreenCounterClockwise];
+    }];
+
+    [self constructCommandWithHotKeyManager:hotKeyManager commandKey:AMConfigurationCommandSwapScreenCWKey handler:^{
+        [windowManager swapFocusedWindowScreenClockwise];
     }];
 
     [self constructCommandWithHotKeyManager:hotKeyManager commandKey:AMConfigurationCommandSwapCCWKey handler:^{
@@ -298,7 +323,6 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
     for (NSString *layoutString in layoutStrings) {
         Class layoutClass = [self.class layoutClassForString:layoutString];
         if (!layoutClass) {
-            DDLogError(@"Unrecognized layout string: %@", layoutString);
             continue;
         }
         [self constructCommandWithHotKeyManager:hotKeyManager commandKey:[self constructLayoutKeyString:layoutString] handler:^{
@@ -350,6 +374,22 @@ static NSString *const AMConfigurationMouseFollowsFocus = @"mouse-follows-focus"
     }
 
     return [self.defaultConfiguration[AMConfigurationMouseFollowsFocus] boolValue];
+}
+
+- (BOOL)enablesLayoutHUD {
+    if (self.configuration[AMConfigurationEnablesLayoutHUD]) {
+        return [self.configuration[AMConfigurationEnablesLayoutHUD] boolValue];
+    }
+
+    return [self.defaultConfiguration[AMConfigurationEnablesLayoutHUD] boolValue];
+}
+
+- (BOOL)enablesLayoutHUDOnSpaceChange {
+    if (self.configuration[AMConfigurationEnablesLayoutHUDOnSpaceChange]) {
+        return [self.configuration[AMConfigurationEnablesLayoutHUDOnSpaceChange] boolValue];
+    }
+
+    return [self.defaultConfiguration[AMConfigurationEnablesLayoutHUDOnSpaceChange] boolValue];
 }
 
 @end

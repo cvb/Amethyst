@@ -25,6 +25,8 @@
 - (AMLayout *)currentLayout;
 
 @property (nonatomic, strong) AMLayoutNameWindow *layoutNameWindow;
+
+@property (nonatomic, assign) BOOL changingSpace;
 @end
 
 @implementation AMScreenManager
@@ -60,11 +62,16 @@
             }
         }
 
+        [self hideLayoutHUD:nil];
+
         @weakify(self);
         [RACObserve(self, currentLayoutIndex) subscribeNext:^(NSNumber *currentLayoutIndex) {
             @strongify(self);
 
-            [self displayLayoutHUD];
+            if (!self.changingSpace || [[AMConfiguration sharedConfiguration] enablesLayoutHUDOnSpaceChange]) {
+                [self displayLayoutHUD];
+            }
+            self.changingSpace = NO;
         }];
     }
     return self;
@@ -80,6 +87,7 @@
     _currentSpaceIdentifier = currentSpaceIdentifier;
 
     if (_currentSpaceIdentifier) {
+        self.changingSpace = YES;
         self.currentLayoutIndex = [self.currentLayoutIndexBySpaceIdentifier[_currentSpaceIdentifier] integerValue];
         if (self.layoutsBySpaceIdentifier[_currentSpaceIdentifier]) {
             self.layouts = self.layoutsBySpaceIdentifier[_currentSpaceIdentifier];
@@ -92,9 +100,15 @@
             self.layoutsBySpaceIdentifier[_currentSpaceIdentifier] = layouts;
         }
     }
+
+    [self setNeedsReflow];
 }
 
 - (void)displayLayoutHUD {
+    if (![[AMConfiguration sharedConfiguration] enablesLayoutHUD]) {
+        return;
+    }
+
     CGRect screenFrame = self.screen.frame;
     CGPoint screenCenter = (CGPoint){
         .x = CGRectGetMidX(screenFrame),
@@ -118,14 +132,18 @@
 }
 
 - (void)setNeedsReflow {
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@checkselector(self, reflow:) object:nil];
-    [self performSelector:@checkselector(self, reflow:) withObject:nil afterDelay:0.2];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self reflow:nil];
+    });
+//    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@checkselector(self, reflow:) object:nil];
+//    [self performSelector:@checkselector(self, reflow:) withObject:nil afterDelay:0.2];
 }
 
-- (void)reflow:(NSTimer *)timer {
+- (void)reflow:(id)sender {
     if (!self.currentSpaceIdentifier) return;
     if (self.currentLayoutIndex >= self.layouts.count) return;
     if (![AMConfiguration sharedConfiguration].tilingEnabled) return;
+    //    if (self.isFullScreen) return;
 
     [self.layouts[self.currentLayoutIndex] reflowScreen:self.screen withWindows:[self.delegate activeWindowsForScreenManager:self]];
 }
@@ -139,8 +157,13 @@
     return self.layouts[self.currentLayoutIndex];
 }
 
-- (void)cycleLayout {
+- (void)cycleLayoutForward {
     self.currentLayoutIndex = (self.currentLayoutIndex + 1) % self.layouts.count;
+    [self setNeedsReflow];
+}
+
+- (void)cycleLayoutBackward {
+    self.currentLayoutIndex = (self.currentLayoutIndex == 0 ? self.layouts.count : self.currentLayoutIndex) - 1;
     [self setNeedsReflow];
 }
 
